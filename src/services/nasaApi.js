@@ -123,6 +123,7 @@ class NASAApiService {
   async getEventById(eventId) {
     // EONET API से इवेंट ID प्राप्त की जाती है, इसलिए makeEONETRequest का उपयोग करें
     return this.makeEONETRequest(`/events/${eventId}`, {}); 
+  }
 
   // Get EONET events from multiple sources - REAL DATA ONLY
   async getNaturalEvents(status = 'open', limit = 20, days = 30) {
