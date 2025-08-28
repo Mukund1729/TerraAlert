@@ -95,6 +95,7 @@ class NASAApiService {
   }
 
   // Get Earth Imagery (Landsat)
+  // Get Earth Imagery (Landsat)
   async getEarthImagery(lat, lon, date = null, dim = 0.10) {
     const params = {
       lat,
@@ -103,7 +104,7 @@ class NASAApiService {
       ...(date && { date })
     };
     
-    return this.makeRequest('/planetary/earth/imagery', params);
+    return this.makeNASARequest('/planetary/earth/imagery', params); // makeRequest को makeNASARequest में बदला गया
   }
 
   // Get Earth Assets (available dates for location)
@@ -115,8 +116,13 @@ class NASAApiService {
       ...(end && { end })
     };
     
-    return this.makeRequest('/planetary/earth/assets', params);
+    return this.makeNASARequest('/planetary/earth/assets', params); // makeRequest को makeNASARequest में बदला गया
   }
+
+  // Get specific event by ID
+  async getEventById(eventId) {
+    // EONET API से इवेंट ID प्राप्त की जाती है, इसलिए makeEONETRequest का उपयोग करें
+    return this.makeEONETRequest(`/events/${eventId}`, {}); 
 
   // Get EONET events from multiple sources - REAL DATA ONLY
   async getNaturalEvents(status = 'open', limit = 20, days = 30) {
