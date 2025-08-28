@@ -1,0 +1,172 @@
+import jsPDF from 'jspdf';
+
+export const generateReportPDF = (report) => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.width;
+  const margin = 20;
+  let yPosition = 30;
+
+  // Helper function to add text with word wrap
+  const addText = (text, x, y, maxWidth, fontSize = 12) => {
+    doc.setFontSize(fontSize);
+    const lines = doc.splitTextToSize(text, maxWidth);
+    doc.text(lines, x, y);
+    return y + (lines.length * fontSize * 0.4);
+  };
+
+  // Header
+  doc.setFontSize(20);
+  doc.setFont(undefined, 'bold');
+  doc.text('TerraAlert Disaster Report', margin, yPosition);
+  yPosition += 15;
+
+  // Report type and severity
+  doc.setFontSize(14);
+  doc.setFont(undefined, 'normal');
+  const typeText = `Type: ${report.type?.toUpperCase() || 'Unknown'} ${report.icon || ''}`;
+  doc.text(typeText, margin, yPosition);
+  yPosition += 10;
+
+  const severityColor = report.severity === 'high' ? [255, 0, 0] : 
+                       report.severity === 'medium' ? [255, 165, 0] : [0, 128, 0];
+  doc.setTextColor(...severityColor);
+  doc.text(`Severity: ${report.severity?.toUpperCase() || 'Unknown'}`, margin, yPosition);
+  doc.setTextColor(0, 0, 0);
+  yPosition += 15;
+
+  // Basic Information
+  doc.setFontSize(16);
+  doc.setFont(undefined, 'bold');
+  doc.text('Basic Information', margin, yPosition);
+  yPosition += 10;
+
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'normal');
+  
+  const basicInfo = [
+    ['Location:', report.location || 'Not specified'],
+    ['Date & Time:', report.time || 'Not specified'],
+    ['Event ID:', report.id || 'Not specified'],
+    ['Source:', report.source || 'TerraAlert']
+  ];
+
+  basicInfo.forEach(([label, value]) => {
+    doc.setFont(undefined, 'bold');
+    doc.text(label, margin, yPosition);
+    doc.setFont(undefined, 'normal');
+    doc.text(value, margin + 40, yPosition);
+    yPosition += 8;
+  });
+
+  yPosition += 10;
+
+  // Event Details
+  if (report.magnitude || report.depth || report.confidence) {
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('Event Details', margin, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+
+    if (report.magnitude) {
+      doc.text(`Magnitude: ${report.magnitude}`, margin, yPosition);
+      yPosition += 8;
+    }
+    if (report.depth) {
+      doc.text(`Depth: ${report.depth} km`, margin, yPosition);
+      yPosition += 8;
+    }
+    if (report.confidence) {
+      doc.text(`Confidence: ${report.confidence}%`, margin, yPosition);
+      yPosition += 8;
+    }
+    if (report.epicenterDistance) {
+      doc.text(`Epicenter: ${report.epicenterDistance}`, margin, yPosition);
+      yPosition += 8;
+    }
+    if (report.intensity) {
+      doc.text(`Intensity: ${report.intensity}`, margin, yPosition);
+      yPosition += 8;
+    }
+    yPosition += 10;
+  }
+
+  // Description
+  if (report.description) {
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('Description', margin, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+    yPosition = addText(report.description, margin, yPosition, pageWidth - 2 * margin);
+    yPosition += 10;
+  }
+
+  // Impact Assessment
+  doc.setFontSize(16);
+  doc.setFont(undefined, 'bold');
+  doc.text('Impact Assessment', margin, yPosition);
+  yPosition += 10;
+
+  doc.setFontSize(12);
+  doc.setFont(undefined, 'normal');
+
+  const impactInfo = [
+    ['Affected Areas:', report.affectedAreas || 'Not specified'],
+    ['Casualties:', report.casualties || 'No casualties reported'],
+    ['Damage Assessment:', report.damageAssessment || 'Assessment pending']
+  ];
+
+  impactInfo.forEach(([label, value]) => {
+    doc.setFont(undefined, 'bold');
+    doc.text(label, margin, yPosition);
+    yPosition += 8;
+    doc.setFont(undefined, 'normal');
+    yPosition = addText(value, margin + 5, yPosition, pageWidth - 2 * margin - 5);
+    yPosition += 5;
+  });
+
+  // Additional Information
+  if (report.tsunamiThreat || report.feltReports || report.coordinates) {
+    yPosition += 10;
+    doc.setFontSize(16);
+    doc.setFont(undefined, 'bold');
+    doc.text('Additional Information', margin, yPosition);
+    yPosition += 10;
+
+    doc.setFontSize(12);
+    doc.setFont(undefined, 'normal');
+
+    if (report.tsunamiThreat) {
+      doc.text(`Tsunami Threat: ${report.tsunamiThreat}`, margin, yPosition);
+      yPosition += 8;
+    }
+    if (report.feltReports) {
+      doc.text(`Felt Reports: ${report.feltReports}`, margin, yPosition);
+      yPosition += 8;
+    }
+    if (report.coordinates) {
+      doc.text(`Coordinates: ${report.coordinates[1]}, ${report.coordinates[0]}`, margin, yPosition);
+      yPosition += 8;
+    }
+  }
+
+  // Footer
+  yPosition = doc.internal.pageSize.height - 30;
+  doc.setFontSize(10);
+  doc.setFont(undefined, 'italic');
+  doc.text('Generated by TerraAlert - Real-time Disaster Monitoring System', margin, yPosition);
+  doc.text(`Report generated on: ${new Date().toLocaleString()}`, margin, yPosition + 10);
+
+  return doc;
+};
+
+export const downloadReportPDF = (report) => {
+  const doc = generateReportPDF(report);
+  const fileName = `TerraAlert_${report.type}_${report.id}_${new Date().toISOString().split('T')[0]}.pdf`;
+  doc.save(fileName);
+};
