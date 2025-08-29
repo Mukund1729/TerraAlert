@@ -2,8 +2,6 @@
 
 const NASA_API_KEY = process.env.REACT_APP_NASA_API_KEY;
 const NASA_BASE_URL = 'https://api.nasa.gov';
-const USGS_EARTHQUAKE_API = 'https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary';
-const FEMA_API = 'https://www.fema.gov/api/open/v2';
 const NASA_EONET_API = 'https://eonet.gsfc.nasa.gov/api/v2.1';
 
 class NASAApiService {
@@ -111,17 +109,6 @@ class NASAApiService {
 // 🔥 Create Singleton
 const nasaApiService = new NASAApiService();
 
-// ✅ Export (default + functions)
+// ✅ Export (default + named)
 export default nasaApiService;
-
-export const {
-  getEarthImagery,
-  getEarthAssets,
-  getAPOD,
-  getNearEarthObjects,
-  getMarsWeather,
-  getNaturalEvents,
-  getEventCategories,
-  getEventById,
-  getEventsByCategory
-} = nasaApiService;
+export { nasaApiService };
